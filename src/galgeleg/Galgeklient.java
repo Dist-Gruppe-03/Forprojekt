@@ -1,16 +1,49 @@
 package galgeleg;
 
-import java.rmi.Naming;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Scanner;
+
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+
+
 
 public class Galgeklient {
 
     public static void main(String[] arg) throws Exception {
+    	
+    	URL url = new URL("http://localhost:9901/galgeleg?wsdl");
+        QName qname = new QName("http://galgeleg/", "GalgelogikService");
+        Service service = Service.create(url, qname);
+        
+        GalgeI g = service.getPort(GalgeI.class);
 
-        GalgeI spil = (GalgeI) Naming.lookup("rmi://localhost:1099/galgeleg");
-
+        Galgelogik spil = new Galgelogik();
         spil.nulstil();
-
+        
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("Velkommen til galgeleg.");
+        System.out.println("Log ind for at spille");
+        System.out.println("*****");
+        
+        while (true) {
+            System.out.println("Indtast brugernavn: ");
+            String bruger = scanner.nextLine();
+            
+            System.out.println("Indtast password: ");
+            String password = scanner.nextLine();
+            
+            if (g.hentBruger(bruger, password)){
+            	System.out.println("velkommen " + bruger);
+                break;
+            }
+            else
+                System.out.println("Forkert login - prøv igen");
+        }
+        
+        
         spil.logStatus();
 
         spil.gætBogstav("e");
@@ -18,81 +51,81 @@ public class Galgeklient {
 
         spil.gætBogstav("a");
         spil.logStatus();
-        System.out.println("" + spil.getAntalForkerteBogstaver());
-        System.out.println("" + spil.getSynligtOrd());
-        if (spil.erSpilletSlut()) {
+        System.out.println("" + g.getAntalForkerteBogstaver());
+        System.out.println("" + g.getSynligtOrd());
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("i");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("i");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("s");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("s");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("r");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("r");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("l");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("l");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("b");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("b");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("o");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("o");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("t");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("t");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("n");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("n");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("m");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("m");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("y");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("y");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("p");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("p");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 
-        spil.gætBogstav("g");
-        spil.logStatus();
-        if (spil.erSpilletSlut()) {
+        g.gætBogstav("g");
+        g.logStatus();
+        if (g.erSpilletSlut()) {
             return;
         }
 

@@ -8,8 +8,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
+
+import javax.jws.WebService;
+
+import brugerautorisation.data.Bruger;
+import brugerautorisation.transport.rmi.Brugeradmin;
+
+import java.rmi.Naming;
 import java.rmi.server.UnicastRemoteObject;
 
+
+@WebService(endpointInterface = "galgeleg.GalgeI")
 public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
   ArrayList<String> muligeOrd = new ArrayList<String>();
   private String ordet;
@@ -19,11 +28,13 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
   private boolean sidsteBogstavVarKorrekt;
   private boolean spilletErVundet;
   private boolean spilletErTabt;
-
+  private Brugeradmin BA;
+  
 
   public ArrayList<String> getBrugteBogstaver() {
     return brugteBogstaver;
   }
+
 
   public String getSynligtOrd() {
     return synligtOrd;
@@ -125,6 +136,22 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
     if (spilletErVundet) System.out.println("- SPILLET ER VUNDET");
     System.out.println("---------- ");
   }
+
+
+  public boolean hentBruger(String brugernavn, String adgangskode) {
+	  try {
+	      BA = (Brugeradmin) Naming.lookup("rmi://javabog.dk/brugeradmin");
+	      Bruger b = BA.hentBruger(brugernavn, adgangskode);
+	      return true;
+	  }
+	  catch (Exception e) {
+	      e.printStackTrace();
+	  }
+	
+	return false;
+  }
+  
+ 
 
 /*
   public static String hentUrl(String url) throws IOException {
