@@ -203,7 +203,7 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
    
   
    
-/*
+
   public static String hentUrl(String url) throws IOException {
     System.out.println("Henter data fra " + url);
     BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
@@ -215,11 +215,16 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
     }
     return sb.toString();
   }
-*/
-/*
-  public void hentOrdFraDr() throws Exception {
-    String data = hentUrl("https://dr.dk");
-    //System.out.println("data = " + data);
+
+
+  public void hentOrdFraDr() throws RuntimeException {
+    String data = null;
+      try {
+          data = hentUrl("https://dr.dk");
+          //System.out.println("data = " + data);
+      } catch (IOException ex) {
+          Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
     data = data.substring(data.indexOf("<body")). // fjern headere
             replaceAll("<.+?>", " ").toLowerCase(). // fjern tags
@@ -241,5 +246,5 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
     System.out.println("muligeOrd = " + muligeOrd);
     nulstil();
   }
-*/
+
 }
