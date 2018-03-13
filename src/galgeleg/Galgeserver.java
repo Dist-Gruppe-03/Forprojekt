@@ -2,6 +2,8 @@ package galgeleg;
 
 import java.rmi.Naming;
 
+import javax.xml.ws.Endpoint;
+
 /**
  *
  * @author krede
@@ -13,6 +15,8 @@ public class Galgeserver {
 
         GalgeI g = new Galgelogik();
         Naming.rebind("rmi://localhost/galgeleg", g);
+        Endpoint.publish("http://[::]:9901/galgeleg", g);
         System.out.println("Galgeleg startet.");
+
     }
 }
