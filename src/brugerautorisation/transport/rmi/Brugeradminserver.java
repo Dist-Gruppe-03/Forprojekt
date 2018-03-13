@@ -16,11 +16,9 @@ public class Brugeradminserver
 	}
 }
 /* Overfør til server med f.eks.:
-
 cd /home/j/DistribueredeSystemer/DistribueredeSystemer/
 ant -q
 rsync -a dist/* deltagere.html gmail-adgangskode.txt  javabog.dk:DistribueredeSystemer/
-
 // På serveren javabog.dk - start med
 cd DistribueredeSystemer
 java -jar DistribueredeSystemer.jar
