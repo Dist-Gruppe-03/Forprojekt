@@ -2,27 +2,11 @@ package galgeleg;
 
 import java.net.URL;
 import java.util.ArrayList;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import java.util.Scanner;
-
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
-
-        GalgeI spil = (GalgeI) Naming.lookup("rmi://localhost:1099/galgeleg");
-
-        spil.nulstil();
-     try {
-          spil.hentOrdFraDr();
-      } catch (Exception ex) {
-          Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
-      }
-    
-        spil.logStatus();
 
 
 public class Galgeklient {
