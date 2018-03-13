@@ -34,5 +34,5 @@ public interface GalgeI extends java.rmi.Remote {
     @WebMethod boolean hentBruger(String brugernavn, String adgangskode) throws java.rmi.RemoteException;
 
     //public static String hentUrl(String url) throws java.rmi.RemoteException;
-    //public void hentOrdFraDr() throws java.rmi.RemoteException;
+    @WebMethod public void hentOrdFraDr() throws java.rmi.RemoteException;
 }

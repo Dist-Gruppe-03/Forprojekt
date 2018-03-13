@@ -22,6 +22,7 @@ public class Galgeklient {
 
         Galgelogik spil = new Galgelogik();
         spil.nulstil();
+        spil.hentOrdFraDr();
         
         Scanner scanner = new Scanner(System.in);
         
