@@ -13,7 +13,7 @@ public class Galgeklient {
 
     public static void main(String[] arg) throws Exception {
     	
-    	URL url = new URL("http://localhost:9901/galgeleg?wsdl");
+    	URL url = new URL("http://ubuntu4.saluton.dk:9924/galgeleg?wsdl");
         QName qname = new QName("http://galgeleg/", "GalgelogikService");
         Service service = Service.create(url, qname);
         boolean spilAktivt = true; 
@@ -59,16 +59,16 @@ public class Galgeklient {
         			if (spil.erSidsteBogstavKorrekt()){
 
         				if (spil.erSpilletVundet() == true){
-        					System.out.println("Du har vundet.");
+        					System.out.println("Du har vundet, ordet var: " + spil.getOrdet());
         					spil.nulstil();
         					spilAktivt = false;
         				}
-        			}
-        				
+        			}	
         			else {
         			
         				 if (spil.erSpilletTabt() == true){
-        					System.out.println("Du har gættet forkert " + spil.getAntalForkerteBogstaver() + " gange, du har tabt.");
+        					System.out.println("Du har gættet forkert for mange gange, du har tabt.");
+                                                System.out.println("Ordet var: " + spil.getOrdet());
         				 	spil.nulstil();
         				 	spilAktivt = false;
         				 }
@@ -78,7 +78,7 @@ public class Galgeklient {
         	else 
         		System.out.println("Ikke ét bogstav, prøv igen");
         }
-        
+        scanner.close();
     }
     
 }
