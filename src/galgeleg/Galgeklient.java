@@ -18,9 +18,8 @@ public class Galgeklient {
         Service service = Service.create(url, qname);
         boolean spilAktivt = true; 
         
-        GalgeI g = service.getPort(GalgeI.class);
+        GalgeI spil = service.getPort(GalgeI.class);
 
-        Galgelogik spil = new Galgelogik();
         spil.nulstil();
         spil.hentOrdFraDr();
         
@@ -37,7 +36,7 @@ public class Galgeklient {
             System.out.println("Indtast password: ");
             String password = scanner.nextLine();
             
-            if (g.hentBruger(bruger, password)){
+            if (spil.hentBruger(bruger, password)){
             	System.out.println("Velkommen " + bruger);
                 break;
             }
