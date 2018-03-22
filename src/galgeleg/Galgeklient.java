@@ -59,7 +59,8 @@ public class Galgeklient {
 
         				if (spil.erSpilletVundet() == true){
         					System.out.println("Du har vundet, ordet var: " + spil.getOrdet());
-        					spil.nulstil();
+        					spil.skrivHighScore();
+                            spil.nulstil();
         					spilAktivt = false;
         				}
         			}	
@@ -68,7 +69,8 @@ public class Galgeklient {
         				 if (spil.erSpilletTabt() == true){
         					System.out.println("Du har gættet forkert for mange gange, du har tabt.");
                                                 System.out.println("Ordet var: " + spil.getOrdet());
-        				 	spil.nulstil();
+        				 	spil.skrivHighScore();
+                             spil.nulstil();
         				 	spilAktivt = false;
         				 }
         			}
