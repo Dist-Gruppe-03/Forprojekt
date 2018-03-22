@@ -35,4 +35,9 @@ public interface GalgeI extends java.rmi.Remote {
 
     //public static String hentUrl(String url) throws java.rmi.RemoteException;
     @WebMethod public void hentOrdFraDr() throws java.rmi.RemoteException;
+    
+     @WebMethod public void skrivHighScore() throws java.rmi.RemoteException;
+     
+      @WebMethod public int[] laesHighScore() throws java.rmi.RemoteException;
+     
 }
