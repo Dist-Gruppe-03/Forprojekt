@@ -1,9 +1,13 @@
 package galgeleg;
 
+import java.awt.BorderLayout;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
@@ -11,6 +15,7 @@ import javax.xml.ws.Service;
 
 public class Galgeklient {
 
+    
     public static void main(String[] arg) throws Exception {
     	
     	URL url = new URL("http://ubuntu4.saluton.dk:9924/galgeleg?wsdl");
@@ -19,17 +24,22 @@ public class Galgeklient {
         boolean spilAktivt = true; 
         
         GalgeI spil = service.getPort(GalgeI.class);
+        GalgeGUI GUI = new GalgeGUI(spil);
 
         spil.nulstil();
         spil.hentOrdFraDr();
-        
+
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("Velkommen til galgeleg.");
         System.out.println("Log ind for at spille");
-        System.out.println("*****");
         
-        while (true) {
+        GUI.GUI();
+        
+        while (GUI.login() == false) {
+        	
+        	Thread.sleep(100);
+        	/*
             System.out.println("Indtast brugernavn: ");
             String bruger = scanner.nextLine();
             
@@ -42,6 +52,7 @@ public class Galgeklient {
             }
             else
                 System.out.println("Forkert login - prøv igen");
+                */
         }
         
         while (spilAktivt){
@@ -52,14 +63,13 @@ public class Galgeklient {
         	if (bogstav.matches("[a-zA-Z]") && bogstav.length() == 1){
         		if (spil.getBrugteBogstaver().contains(bogstav)){
         			System.out.println("Du har allerede gættet på: " + bogstav);
-        		}
-        		else {
+        		}else {
         			spil.gætBogstav(bogstav);
         			if (spil.erSidsteBogstavKorrekt()){
 
         				if (spil.erSpilletVundet() == true){
         					System.out.println("Du har vundet, ordet var: " + spil.getOrdet());
-        					spil.skrivHighScore();
+        					//spil.skrivHighScore();
                             spil.nulstil();
         					spilAktivt = false;
         				}
@@ -69,15 +79,15 @@ public class Galgeklient {
         				 if (spil.erSpilletTabt() == true){
         					System.out.println("Du har gættet forkert for mange gange, du har tabt.");
                                                 System.out.println("Ordet var: " + spil.getOrdet());
-        				 	spil.skrivHighScore();
+        				 	//spil.skrivHighScore();
                              spil.nulstil();
         				 	spilAktivt = false;
         				 }
         			}
         		}
+        	}else {
+        		        		System.out.println("Ikke ét bogstav, prøv igen");
         	}
-        	else 
-        		System.out.println("Ikke ét bogstav, prøv igen");
         }
         scanner.close();
     }
