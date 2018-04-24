@@ -1,16 +1,9 @@
 package galgeleg;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Scanner;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
-
 
 
 public class Galgeklient {
@@ -18,13 +11,14 @@ public class Galgeklient {
     
     public static void main(String[] arg) throws Exception {
     	
-    	URL url = new URL("http://ubuntu4.saluton.dk:9924/galgeleg?wsdl");
+    	//URL url = new URL("http://ubuntu4.saluton.dk:9924/galgeleg?wsdl");
+        URL url = new URL("http://localhost:9924/galgeleg?wsdl");
         QName qname = new QName("http://galgeleg/", "GalgelogikService");
         Service service = Service.create(url, qname);
         boolean spilAktivt = true; 
         
         GalgeI spil = service.getPort(GalgeI.class);
-        GalgeGUI GUI = new GalgeGUI(spil);
+        //GalgeGUI GUI = new GalgeGUI(spil);
 
         spil.nulstil();
         spil.hentOrdFraDr();
@@ -34,9 +28,9 @@ public class Galgeklient {
         System.out.println("Velkommen til galgeleg.");
         System.out.println("Log ind for at spille");
         
-        GUI.GUI();
+        //GUI.GUI();
         
-        while (GUI.login() == false) {
+        //while (GUI.login() == false) {
         	
         	Thread.sleep(100);
         	/*
@@ -53,7 +47,7 @@ public class Galgeklient {
             else
                 System.out.println("Forkert login - prøv igen");
                 */
-        }
+        //}
         
         while (spilAktivt){
         	System.out.println("Gæt ordet: " + spil.getSynligtOrd());

@@ -1,13 +1,5 @@
 package galgeleg;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
 
 import javax.jws.WebService;
 
@@ -15,10 +7,8 @@ import brugerautorisation.data.Bruger;
 import brugerautorisation.transport.rmi.Brugeradmin;
 
 import java.rmi.Naming;
-import java.rmi.server.UnicastRemoteObject;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -148,7 +138,7 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
       sidsteBogstavVarKorrekt = false;
       System.out.println("Bogstavet var IKKE korrekt: " + bogstav);
       antalForkerteBogstaver = antalForkerteBogstaver + 1;
-      if (antalForkerteBogstaver > 6) {
+      if (antalForkerteBogstaver >= 6) {
           skrivHighScore();
         spilletErTabt = true;
       }
