@@ -22,16 +22,15 @@ public class Galgeklient {
         QName qname = new QName("http://galgeleg/", "GalgelogikService");
         Service service = Service.create(url, qname);
         boolean spilAktivt = true; 
-        
+        String svar = "N";
         GalgeI spil = service.getPort(GalgeI.class);
         GalgeGUI GUI = new GalgeGUI(spil);
+        Scanner scanner = new Scanner(System.in);
 
         spil.nulstil();
-        spil.hentOrdFraDr();
-
-        Scanner scanner = new Scanner(System.in);
+        spil.hentOrdFraDr(); 
         
-        System.out.println("Velkommen til galgeleg.");
+          System.out.println("Velkommen til galgeleg.");
         System.out.println("Log ind for at spille");
         
         GUI.GUI();
@@ -55,7 +54,14 @@ public class Galgeklient {
                 */
         }
         
+        
         while (spilAktivt){
+            
+            
+
+        
+        
+      
         	System.out.println("Gæt ordet: " + spil.getSynligtOrd());
         	System.out.println("Dine gæt: " + spil.getBrugteBogstaver());
         	System.out.println("Gæt på et bogstav");
@@ -70,18 +76,45 @@ public class Galgeklient {
         				if (spil.erSpilletVundet() == true){
         					System.out.println("Du har vundet, ordet var: " + spil.getOrdet());
         					//spil.skrivHighScore();
-                            spil.nulstil();
-        					spilAktivt = false;
+                                                spil.nulstil();
+        					
+                                                System.out.println("Vil du spille igen? skriv Y");
+                                                bogstav = scanner.next();
+                                                System.out.println(bogstav);
+                                                if(bogstav.equals("Y")){
+                                                    System.out.println("Nyt spil starter");
+                                                    spil.nulstil();
+                                                    spil.hentOrdFraDr();
+                                                    
+                                                }else{
+                                                    spilAktivt = false;
+                                                }
+                                               
+                                                
+                                                
         				}
         			}	
         			else {
         			
         				 if (spil.erSpilletTabt() == true){
+                                             
         					System.out.println("Du har gættet forkert for mange gange, du har tabt.");
                                                 System.out.println("Ordet var: " + spil.getOrdet());
         				 	//spil.skrivHighScore();
-                             spil.nulstil();
-        				 	spilAktivt = false;
+                                                 spil.nulstil();
+        				 	
+                                                System.out.println("Vil du spille igen? skriv Y");
+                                                bogstav = scanner.next();
+                                                System.out.println(bogstav);
+                                                if(bogstav.equals("Y")){
+                                                    System.out.println("Nyt spil starter");
+                                                    spil.nulstil();
+                                                    spil.hentOrdFraDr();
+                                                }else{
+                                                    
+                                                    spilAktivt = false;
+                                                }
+                                                
         				 }
         			}
         		}
@@ -90,6 +123,7 @@ public class Galgeklient {
         	}
         }
         scanner.close();
+        System.out.println("galgeleg er færdigt, start programmet igen for at spille igen");
     }
     
 }
