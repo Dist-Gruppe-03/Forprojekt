@@ -6,17 +6,25 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
-
+import galgeleg.Galgeleg;
 import javax.jws.WebService;
 
 import brugerautorisation.data.Bruger;
 import brugerautorisation.transport.rmi.Brugeradmin;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -33,6 +41,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,47 +56,53 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
   private boolean spilletErVundet;
   private boolean spilletErTabt;
   private Brugeradmin BA;
+  static HashMap<String, Galgeleg> brugere;
   private int scoren;
   private int[] Highscore = new int[10];
   private int[] revHighscore = new int[10];
   private int[] sortedHighscore = new int[10];
   
+  
 
-  public ArrayList<String> getBrugteBogstaver() {
-    return brugteBogstaver;
+  public ArrayList<String> getBrugteBogstaver(String bruger) {
+	Galgeleg g = brugere.get(bruger);
+    return g.brugteBogstaver;
   }
 
 
-  public String getSynligtOrd() {
-    return synligtOrd;
+  public String getSynligtOrd(String bruger) {
+	Galgeleg g = brugere.get(bruger);
+    return g.synligtOrd;
   }
 
-  public String getOrdet() {
-    return ordet;
-  }
-
-   public int getScoren() {
-    return scoren;
+  public String getOrdet(String bruger) {
+	Galgeleg g = brugere.get(bruger);
+    return g.ordet;
   }
    
-  public int getAntalForkerteBogstaver() {
-    return antalForkerteBogstaver;
+  public int getAntalForkerteBogstaver(String bruger) {
+	Galgeleg g = brugere.get(bruger);
+    return g.antalForkerteBogstaver;
   }
 
-  public boolean erSidsteBogstavKorrekt() {
-    return sidsteBogstavVarKorrekt;
+  public boolean erSidsteBogstavKorrekt(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
+    return g.sidsteBogstavVarKorrekt;
   }
 
-  public boolean erSpilletVundet() {
-    return spilletErVundet;
+  public boolean erSpilletVundet(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
+    return g.spilletErVundet;
   }
 
-  public boolean erSpilletTabt() {
-    return spilletErTabt;
+  public boolean erSpilletTabt(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
+    return g.spilletErTabt;
   }
 
-  public boolean erSpilletSlut() {
-    return spilletErTabt || spilletErVundet;
+  public boolean erSpilletSlut(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
+    return g.spilletErTabt || g.spilletErVundet;
   }
 
 
@@ -102,83 +117,91 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
     muligeOrd.add("solsort");
     muligeOrd.add("seksten");
     muligeOrd.add("sytten");
-    nulstil();
+    brugere = new HashMap<>();
   }
 
-  public void nulstil() {
-    brugteBogstaver.clear();
-    antalForkerteBogstaver = 0;
-    spilletErVundet = false;
-    spilletErTabt = false;
-    scoren = 0;
-    ordet = muligeOrd.get(new Random().nextInt(muligeOrd.size()));
-    opdaterSynligtOrd();
+  public void nulstil(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
+    g.brugteBogstaver.clear();
+    g.antalForkerteBogstaver = 0;
+    g.spilletErVundet = false;
+    g.spilletErTabt = false;
+    g.ordet = muligeOrd.get(new Random().nextInt(muligeOrd.size()));
+    g.opdaterSynligtOrd();
   }
 
 
-  public void opdaterSynligtOrd() {
-    synligtOrd = "";
-    spilletErVundet = true;
-    for (int n = 0; n < ordet.length(); n++) {
-      String bogstav = ordet.substring(n, n + 1);
-      if (brugteBogstaver.contains(bogstav)) {
-        synligtOrd = synligtOrd + bogstav;
+  public void opdaterSynligtOrd(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
+    g.synligtOrd = "";
+    g.spilletErVundet = true;
+    for (int n = 0; n < g.ordet.length(); n++) {
+      String bogstav = g.ordet.substring(n, n + 1);
+      if (g.brugteBogstaver.contains(bogstav)) {
+        g.synligtOrd = g.synligtOrd + bogstav;
       } else {
-        synligtOrd = synligtOrd + "*";
-        spilletErVundet = false;
+        g.synligtOrd = g.synligtOrd + "*";
+        g.spilletErVundet = false;
       }
     }
   }
 
-  public void gætBogstav(String bogstav) {
-      
+  public void gætBogstav(String bogstav, String bruger) {
+    Galgeleg g = brugere.get(bruger);
     if (bogstav.length() != 1) return;
     System.out.println("Der gættes på bogstavet: " + bogstav);
-    if (brugteBogstaver.contains(bogstav)) return;
-    if (spilletErVundet || spilletErTabt) return;
+    if (g.brugteBogstaver.contains(bogstav)) return;
+    if (g.spilletErVundet || g.spilletErTabt) return;
 
-    brugteBogstaver.add(bogstav);
+    g.brugteBogstaver.add(bogstav);
 
-    if (ordet.contains(bogstav)) {
-      sidsteBogstavVarKorrekt = true;
-      System.out.println("Bogstavet var korrekt: " + bogstav);
-      scoren++;
+    if (g.ordet.contains(bogstav)) {
+      g.sidsteBogstavVarKorrekt = true;
+      //System.out.println("Bogstavet var korrekt: " + bogstav);
     } else {
       // Vi gættede på et bogstav der ikke var i ordet.
-      sidsteBogstavVarKorrekt = false;
-      System.out.println("Bogstavet var IKKE korrekt: " + bogstav);
-      antalForkerteBogstaver = antalForkerteBogstaver + 1;
-      if (antalForkerteBogstaver > 6) {
-          skrivHighScore();
-        spilletErTabt = true;
+      g.sidsteBogstavVarKorrekt = false;
+      //System.out.println("Bogstavet var IKKE korrekt: " + bogstav);
+      g.antalForkerteBogstaver = g.antalForkerteBogstaver + 1;
+      if (g.antalForkerteBogstaver > 6) {
+        g.spilletErTabt = true;
       }
-      scoren--;
     }
-    opdaterSynligtOrd();
+    g.opdaterSynligtOrd();
   }
 
-  public void logStatus() {
+  public void logStatus(String bruger) {
+	  Galgeleg g = brugere.get(bruger);
     System.out.println("---------- ");
     System.out.println("- ordet (skult) = " + ordet);
     System.out.println("- scoren = " + scoren);
     System.out.println("- synligtOrd = " + synligtOrd);
     System.out.println("- forkerteBogstaver = " + antalForkerteBogstaver);
     System.out.println("- brugeBogstaver = " + brugteBogstaver);
-    if (spilletErTabt){
-        skrivHighScore();
+    if (g.spilletErTabt){
         System.out.println("- SPILLET ER TABT");
     }
-    if (spilletErVundet){
-        skrivHighScore();
+    if (g.spilletErVundet){
         System.out.println("- SPILLET ER VUNDET");
     }
     System.out.println("---------- ");
   }
 
   public boolean hentBruger(String brugernavn, String adgangskode) {
+	  
 	  try {
 	      BA = (Brugeradmin) Naming.lookup("rmi://javabog.dk/brugeradmin");
 	      Bruger b = BA.hentBruger(brugernavn, adgangskode);
+	      if (brugere.containsKey(brugernavn) == false){
+	    	  brugere.put(brugernavn, new Galgeleg());
+	    	  System.out.println("Vi er ikke kendte, vi bliver sat i listen");
+	    	  System.out.println(brugere.size());
+	      }
+	      else {
+	    	  brugere.get(brugernavn);
+	    	  System.out.println("Vi er kendte, vi henter objekt");
+	      }
+	      
 	      return true;
 	  }
 	  catch (Exception e) {
@@ -189,49 +212,49 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
   }
   
  
-  public void skrivHighScore(){
-      
-      laesHighScore();
-      List<String> lines = Arrays.asList(Integer.toString(Highscore[0]),Integer.toString(Highscore[1]),Integer.toString(Highscore[2]),Integer.toString(Highscore[3]),Integer.toString(Highscore[4]),Integer.toString(Highscore[5]),Integer.toString(Highscore[6]),Integer.toString(Highscore[7]),Integer.toString(Highscore[8]),Integer.toString(Highscore[9]));
-        Path file = Paths.get("highscore.txt");
-        
-          try {
-              Files.write(file, lines, Charset.forName("UTF-8"));
-          } catch (IOException ex) {
-              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
-          }
-  }
-  
-   public int[] laesHighScore() {
-       
-      try {
-          
-          int counter = 0;
-          BufferedReader in = new BufferedReader(new FileReader("highscore.txt"));
-          String line;
-          while((line = in.readLine()) != null){
-              Highscore[counter] = Integer.parseInt(line);
-              counter++;   
-          }
-          
-          in.close();
-
-          Arrays.sort(Highscore);
-          Highscore[0] = scoren;
-          Arrays.sort(Highscore);
-               
-          return Highscore;
-      } catch (IOException ex) {
-          List<String> lines = Arrays.asList("0");
-          Path file = Paths.get("highscore.txt");
-          try {
-              Files.write(file, lines, Charset.forName("UTF-8"));
-          } catch (IOException ex1) {
-              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex1);
-          }
-      }
-  return Highscore;
-   }
+//  public void skrivHighScore(){
+//      
+//      laesHighScore();
+//      List<String> lines = Arrays.asList(Integer.toString(Highscore[0]),Integer.toString(Highscore[1]),Integer.toString(Highscore[2]),Integer.toString(Highscore[3]),Integer.toString(Highscore[4]),Integer.toString(Highscore[5]),Integer.toString(Highscore[6]),Integer.toString(Highscore[7]),Integer.toString(Highscore[8]),Integer.toString(Highscore[9]));
+//        Path file = Paths.get("highscore.txt");
+//        
+//          try {
+//              Files.write(file, lines, Charset.forName("UTF-8"));
+//          } catch (IOException ex) {
+//              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
+//          }
+//  }
+//  
+//   public int[] laesHighScore() {
+//       
+//      try {
+//          
+//          int counter = 0;
+//          BufferedReader in = new BufferedReader(new FileReader("highscore.txt"));
+//          String line;
+//          while((line = in.readLine()) != null){
+//              Highscore[counter] = Integer.parseInt(line);
+//              counter++;   
+//          }
+//          
+//          in.close();
+//
+//          Arrays.sort(Highscore);
+//          Highscore[0] = scoren;
+//          Arrays.sort(Highscore);
+//               
+//          return Highscore;
+//      } catch (IOException ex) {
+//          List<String> lines = Arrays.asList("0");
+//          Path file = Paths.get("highscore.txt");
+//          try {
+//              Files.write(file, lines, Charset.forName("UTF-8"));
+//          } catch (IOException ex1) {
+//              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex1);
+//          }
+//      }
+//  return Highscore;
+//   }
 
   public static String hentUrl(String url) throws IOException {
     System.out.println("Henter data fra " + url);
@@ -244,8 +267,9 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
     }
     return sb.toString();
   }
+  
 
-  public void hentOrdFraDr() throws RuntimeException {
+  public void hentOrdFraDr(String bruger) throws RuntimeException {
     String data = null;
       try {
           data = hentUrl("https://dr.dk");
@@ -272,6 +296,26 @@ public class Galgelogik  extends UnicastRemoteObject implements GalgeI {
     muligeOrd.addAll(new HashSet<String>(Arrays.asList(data.split(" "))));
 
     System.out.println("muligeOrd = " + muligeOrd);
-    nulstil();
+    nulstil(bruger);
   }
+  
+	public void highscoreCheck(String bruger, int score) throws ClassNotFoundException, SQLException{
+		int oldHighscore;
+		Class.forName("com.mysql.jdbc.Driver");
+	    Connection con = DriverManager.getConnection("jdbc:mysql://localhost/galgeleg?user=root&password=mvc23");
+	
+	    PreparedStatement st = con.prepareStatement("select highscore from users where username = ?" );
+	    st.setString(1, bruger);
+	    ResultSet rs = st.executeQuery();
+	    if(rs.next()){
+	    	oldHighscore = rs.getInt(1);
+	    	System.out.println(oldHighscore);
+		    if (score < oldHighscore){
+	    		st = con.prepareStatement("update users set highscore = ? where username = ?");
+	    		st.setInt(1,score);
+	    		st.setString(2, bruger);
+	    		st.executeUpdate();
+	    	}
+	    }
+	}    
 }

@@ -4,6 +4,12 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -25,7 +31,7 @@ public class GalgeGUI implements ActionListener {
 	JTextField brugernavn;
 	JPasswordField kodeord;
 	JButton loginKnap;
-	
+	String bruger;
 
 	public GalgeGUI(GalgeI spil) {
 		this.spil = spil;
@@ -73,21 +79,40 @@ public class GalgeGUI implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-        String bruger = brugernavn.getText();
+        bruger = brugernavn.getText();
         String password = String.valueOf(kodeord.getPassword());
         
         try {
 			if (spil.hentBruger(bruger, password)){
 			    this.login = true;
+			    //db
+			    Class.forName("com.mysql.jdbc.Driver");
+			    Connection con = DriverManager.getConnection("jdbc:mysql://localhost/galgeleg?user=root&password=mvc23");
+			    
+			    //select the current user from users-table
+			    PreparedStatement st = con.prepareStatement("select * from users where username = ?" );
+			    st.setString(1, bruger);
+			    ResultSet r1=st.executeQuery();
+			    if(r1.next()) {
+			    }
+			    else { //if user not in db, insert.
+			    st = con.prepareStatement("insert into users (username, highscore) values(?,?)");
+			    st.setString(1, bruger);
+			    st.setInt(2, 0);
+			    st.executeUpdate();
+			    }
 			    frame.setVisible(false);
 			}
 			else {
 				besked.setText("Forkert login - prøv igen");
 			}
-		} catch (RemoteException e1) {
+		} catch (RemoteException | SQLException | ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+	public String getBruger() {
+		return bruger;
 	}
 	
 	public boolean login() {
