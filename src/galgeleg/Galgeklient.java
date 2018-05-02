@@ -68,7 +68,7 @@ public class Galgeklient{
 			System.out.println("Gæt på et bogstav");
 			System.out.println("det rigtige ord er: " + spil.getOrdet(bruger));
 			String bogstav = scanner.next();
-			if (bogstav.matches("[a-zA-Z]") && bogstav.length() == 1) {
+			if (bogstav.matches("[a-zA-ZæøåÆØÅ]") && bogstav.length() == 1) {
 				if (spil.getBrugteBogstaver(bruger).contains(bogstav)) {
 					System.out.println("Du har allerede gættet på: " + bogstav);
 				} else {

@@ -34,11 +34,5 @@ public interface GalgeI extends java.rmi.Remote {
     
     @WebMethod boolean hentBruger(String brugernavn, String adgangskode) throws java.rmi.RemoteException;
 
-    //public static String hentUrl(String url) throws java.rmi.RemoteException;
-    @WebMethod public void hentOrdFraDr(String bruger) throws java.rmi.RemoteException;
-    
-    // @WebMethod public void skrivHighScore() throws java.rmi.RemoteException;
-     
-      //@WebMethod public int[] laesHighScore() throws java.rmi.RemoteException;
     @WebMethod public void highscoreCheck(String bruger, int score) throws java.rmi.RemoteException, ClassNotFoundException, SQLException;
 }
