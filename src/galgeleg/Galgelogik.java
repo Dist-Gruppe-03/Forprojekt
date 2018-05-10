@@ -169,13 +169,32 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
 
     public boolean hentBruger(String brugernavn, String adgangskode) {
 
+        String serv = "sql7.freemysqlhosting.net";
+        String port = "3306";
+        String database = "sql7237298";
+        String username = "sql7237298";
+        String passw = "N3zKVTxn91";
+        
+
+
         try {
             BA = (Brugeradmin) Naming.lookup("rmi://javabog.dk/brugeradmin");
             Bruger b = BA.hentBruger(brugernavn, adgangskode);
+            
+            //if user is not already in hashMap, we add him to map and to DB
             if (brugere.containsKey(brugernavn) == false) {
                 brugere.put(brugernavn, new Galgeleg());
                 System.out.println("Vi er ikke kendte, vi bliver sat i listen");
                 System.out.println(brugere.size());
+                
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = (Connection) DriverManager.getConnection("jdbc:mysql://"+serv+":"+port+"/"+database,
+				username, passw);
+                            
+            PreparedStatement st = con.prepareStatement("insert into USERS (username, highscore) values(?,?)");
+			    st.setString(1, brugernavn);
+			    st.setInt(2, 10);
+			    st.executeUpdate();
             } else {
                 brugere.get(brugernavn);
                 System.out.println("Vi er kendte, vi henter objekt");
@@ -282,17 +301,24 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
 
     public void highscoreCheck(String bruger, int score) throws ClassNotFoundException, SQLException {
         int oldHighscore;
-        Class.forName("com.mysql.jdbc.Driver");
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost/galgeleg?user=root&password=mvc23");
+        String serv = "sql7.freemysqlhosting.net";
+        String port = "3306";
+        String database = "sql7237298";
+        String username = "sql7237298";
+        String passw = "N3zKVTxn91";
 
-        PreparedStatement st = con.prepareStatement("select highscore from users where username = ?");
+        Class.forName("com.mysql.jdbc.Driver");
+       Connection con = (Connection) DriverManager.getConnection("jdbc:mysql://"+serv+":"+port+"/"+database,
+				username, passw);
+
+        PreparedStatement st = con.prepareStatement("select highscore from USERS where username = ?");
         st.setString(1, bruger);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
             oldHighscore = rs.getInt(1);
             System.out.println(oldHighscore);
             if (score < oldHighscore) {
-                st = con.prepareStatement("update users set highscore = ? where username = ?");
+                st = con.prepareStatement("update USERS set highscore = ? where username = ?");
                 st.setInt(1, score);
                 st.setString(2, bruger);
                 st.executeUpdate();
