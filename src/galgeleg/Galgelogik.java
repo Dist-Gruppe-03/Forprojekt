@@ -4,6 +4,7 @@ import java.util.HashMap;
 import javax.jws.WebService;
 import brugerautorisation.data.Bruger;
 import brugerautorisation.transport.rmi.Brugeradmin;
+import db.Connector;
 import java.rmi.Naming;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -39,6 +40,8 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
     private int[] Highscore = new int[10];
     private int[] revHighscore = new int[10];
     private int[] sortedHighscore = new int[10];
+    private Connection conn = null;
+    private Connector connector;
 
     public ArrayList<String> getBrugteBogstaver(String bruger) {
         Galgeleg g = brugere.get(bruger);
@@ -169,14 +172,6 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
 
     public boolean hentBruger(String brugernavn, String adgangskode) {
 
-        String serv = "sql7.freemysqlhosting.net";
-        String port = "3306";
-        String database = "sql7237298";
-        String username = "sql7237298";
-        String passw = "N3zKVTxn91";
-        
-
-
         try {
             BA = (Brugeradmin) Naming.lookup("rmi://javabog.dk/brugeradmin");
             Bruger b = BA.hentBruger(brugernavn, adgangskode);
@@ -187,11 +182,10 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
                 System.out.println("Vi er ikke kendte, vi bliver sat i listen");
                 System.out.println(brugere.size());
                 
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = (Connection) DriverManager.getConnection("jdbc:mysql://"+serv+":"+port+"/"+database,
-				username, passw);
-                            
-            PreparedStatement st = con.prepareStatement("insert into USERS (username, highscore) values(?,?)");
+            //db connection
+            conn = connector.getConnection();  
+        
+            PreparedStatement st = conn.prepareStatement("insert into USERS (username, highscore) values(?,?)");
 			    st.setString(1, brugernavn);
 			    st.setInt(2, 10);
 			    st.executeUpdate();
@@ -301,24 +295,19 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
 
     public void highscoreCheck(String bruger, int score) throws ClassNotFoundException, SQLException {
         int oldHighscore;
-        String serv = "sql7.freemysqlhosting.net";
-        String port = "3306";
-        String database = "sql7237298";
-        String username = "sql7237298";
-        String passw = "N3zKVTxn91";
+        //db connection
+        conn = connector.getConnection(); 
 
-        Class.forName("com.mysql.jdbc.Driver");
-       Connection con = (Connection) DriverManager.getConnection("jdbc:mysql://"+serv+":"+port+"/"+database,
-				username, passw);
-
-        PreparedStatement st = con.prepareStatement("select highscore from USERS where username = ?");
+        
+        PreparedStatement st = conn.prepareStatement("select highscore from USERS where username = ?");
         st.setString(1, bruger);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
             oldHighscore = rs.getInt(1);
             System.out.println(oldHighscore);
             if (score < oldHighscore) {
-                st = con.prepareStatement("update USERS set highscore = ? where username = ?");
+                System.out.println("Ny highscore!");
+                st = conn.prepareStatement("update USERS set highscore = ? where username = ?");
                 st.setInt(1, score);
                 st.setString(2, bruger);
                 st.executeUpdate();
