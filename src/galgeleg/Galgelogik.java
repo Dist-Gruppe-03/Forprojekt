@@ -5,6 +5,7 @@ import javax.jws.WebService;
 import brugerautorisation.data.Bruger;
 import brugerautorisation.transport.rmi.Brugeradmin;
 import db.Connector;
+import db.User;
 import java.rmi.Naming;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,17 +16,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @WebService(endpointInterface = "galgeleg.GalgeI")
 public class Galgelogik extends UnicastRemoteObject implements GalgeI {
-
+    
     ArrayList<String> muligeOrd = new ArrayList<String>();
     private String ordet;
     private ArrayList<String> brugteBogstaver = new ArrayList<String>();
@@ -42,47 +45,47 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
     private int[] sortedHighscore = new int[10];
     private Connection conn = null;
     private Connector connector;
-
+    
     public ArrayList<String> getBrugteBogstaver(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.brugteBogstaver;
     }
-
+    
     public String getSynligtOrd(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.synligtOrd;
     }
-
+    
     public String getOrdet(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.ordet;
     }
-
+    
     public int getAntalForkerteBogstaver(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.antalForkerteBogstaver;
     }
-
+    
     public boolean erSidsteBogstavKorrekt(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.sidsteBogstavVarKorrekt;
     }
-
+    
     public boolean erSpilletVundet(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.spilletErVundet;
     }
-
+    
     public boolean erSpilletTabt(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.spilletErTabt;
     }
-
+    
     public boolean erSpilletSlut(String bruger) {
         Galgeleg g = brugere.get(bruger);
         return g.spilletErTabt || g.spilletErVundet;
     }
-
+    
     public Galgelogik() throws java.rmi.RemoteException {
         muligeOrd.add("bil");
         muligeOrd.add("computer");
@@ -96,7 +99,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         muligeOrd.add("sytten");
         brugere = new HashMap<>();
     }
-
+    
     public void nulstil(String bruger) {
         Galgeleg g = brugere.get(bruger);
         g.brugteBogstaver.clear();
@@ -107,7 +110,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         g.opdaterSynligtOrd();
         hentOrdFraDr(bruger);
     }
-
+    
     public void opdaterSynligtOrd(String bruger) {
         Galgeleg g = brugere.get(bruger);
         g.synligtOrd = "";
@@ -122,7 +125,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
             }
         }
     }
-
+    
     public void gætBogstav(String bogstav, String bruger) {
         Galgeleg g = brugere.get(bruger);
         if (bogstav.length() != 1) {
@@ -135,9 +138,9 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         if (g.spilletErVundet || g.spilletErTabt) {
             return;
         }
-
+        
         g.brugteBogstaver.add(bogstav);
-
+        
         if (g.ordet.contains(bogstav)) {
             g.sidsteBogstavVarKorrekt = true;
             //System.out.println("Bogstavet var korrekt: " + bogstav);
@@ -152,7 +155,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         }
         g.opdaterSynligtOrd();
     }
-
+    
     public void logStatus(String bruger) {
         Galgeleg g = brugere.get(bruger);
         System.out.println("---------- ");
@@ -169,9 +172,8 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         }
         System.out.println("---------- ");
     }
-
+    
     public boolean hentBruger(String brugernavn, String adgangskode) {
-
         try {
             BA = (Brugeradmin) Naming.lookup("rmi://javabog.dk/brugeradmin");
             Bruger b = BA.hentBruger(brugernavn, adgangskode);
@@ -182,57 +184,66 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
                 System.out.println("Vi er ikke kendte, vi bliver sat i listen");
                 System.out.println(brugere.size());
                 
-            //db connection
-            conn = connector.getConnection();  
-        
-            PreparedStatement st = conn.prepareStatement("insert into USERS (username, highscore) values(?,?)");
-			    st.setString(1, brugernavn);
-			    st.setInt(2, 10);
-			    st.executeUpdate();
+                //db connection
+                conn = connector.getConnection();
+                //check if user is db
+                PreparedStatement st = conn.prepareStatement("select * from USERS where username = ?" );
+                st.setString(1, brugernavn);
+                ResultSet r1=st.executeQuery();
+                if(r1.next()) {
+                } //if resultset has a value, user is already there
+                else {
+                    //if not we add him
+                    st = conn.prepareStatement("insert into USERS (username,name, highscore) values(?,?,?)");
+                    st.setString(1, brugernavn);
+                    st.setString(2, b.fornavn);
+                    st.setInt(3, 10);
+                    st.executeUpdate();
+                }
             } else {
                 brugere.get(brugernavn);
                 System.out.println("Vi er kendte, vi henter objekt");
             }
-
+            
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        
         return false;
     }
-
+    
 //  public void skrivHighScore(){
-//      
+//
 //      laesHighScore();
 //      List<String> lines = Arrays.asList(Integer.toString(Highscore[0]),Integer.toString(Highscore[1]),Integer.toString(Highscore[2]),Integer.toString(Highscore[3]),Integer.toString(Highscore[4]),Integer.toString(Highscore[5]),Integer.toString(Highscore[6]),Integer.toString(Highscore[7]),Integer.toString(Highscore[8]),Integer.toString(Highscore[9]));
 //        Path file = Paths.get("highscore.txt");
-//        
+//
 //          try {
 //              Files.write(file, lines, Charset.forName("UTF-8"));
 //          } catch (IOException ex) {
 //              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
 //          }
 //  }
-//  
+//
 //   public int[] laesHighScore() {
-//       
+//
 //      try {
-//          
+//
 //          int counter = 0;
 //          BufferedReader in = new BufferedReader(new FileReader("highscore.txt"));
 //          String line;
 //          while((line = in.readLine()) != null){
 //              Highscore[counter] = Integer.parseInt(line);
-//              counter++;   
+//              counter++;
 //          }
-//          
+//
 //          in.close();
 //
 //          Arrays.sort(Highscore);
 //          Highscore[0] = scoren;
 //          Arrays.sort(Highscore);
-//               
+//
 //          return Highscore;
 //      } catch (IOException ex) {
 //          List<String> lines = Arrays.asList("0");
@@ -256,7 +267,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         }
         return sb.toString();
     }
-
+    
     public void hentOrdFraDr(String bruger) throws RuntimeException {
         String data = null;
         try {
@@ -265,7 +276,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         } catch (IOException ex) {
             Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
         data = data.substring(data.indexOf("<body")). // fjern headere
                 replaceAll("<.+?>", " ").toLowerCase(). // fjern tags
                 replaceAll("&#198;", "æ"). // erstat HTML-tegn
@@ -277,12 +288,12 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
                 replaceAll("[^a-zæøå]", " "). // fjern tegn der ikke er bogstaver
                 replaceAll(" [a-zæøå] ", " "). // fjern 1-bogstavsord
                 replaceAll(" [a-zæøå][a-zæøå] ", " "); // fjern 2-bogstavsord
-
+        
         //System.out.println("data = " + data);
         //System.out.println("data = " + Arrays.asList(data.split("\\s+")));
         muligeOrd.clear();
         muligeOrd.addAll(new HashSet<String>(Arrays.asList(data.split(" "))));
-
+        
         System.out.println("muligeOrd = " + muligeOrd);
         Galgeleg g = brugere.get(bruger);
         g.brugteBogstaver.clear();
@@ -292,12 +303,12 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         g.ordet = muligeOrd.get(new Random().nextInt(muligeOrd.size()));
         g.opdaterSynligtOrd();
     }
-
+    
     public void highscoreCheck(String bruger, int score) throws ClassNotFoundException, SQLException {
         int oldHighscore;
         //db connection
-        conn = connector.getConnection(); 
-
+        conn = connector.getConnection();
+        
         
         PreparedStatement st = conn.prepareStatement("select highscore from USERS where username = ?");
         st.setString(1, bruger);
@@ -314,4 +325,28 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
             }
         }
     }
+    
+    
+    public String getName(String username) throws RemoteException, ClassNotFoundException, SQLException {
+        
+        conn = connector.getConnection();
+        PreparedStatement st = conn.prepareStatement("select name from USERS where username = ?");
+        st.setString(1, username);
+        ResultSet rs = st.executeQuery();
+        rs.next();
+        String name = rs.getString(1);
+        return name;
+    }
+    
+    public int getPersonalHighscore(String username)throws RemoteException, ClassNotFoundException, SQLException {
+        conn = connector.getConnection();
+        PreparedStatement st = conn.prepareStatement("select highscore from USERS where username = ?");
+        st.setString(1, username);
+        ResultSet rs = st.executeQuery();
+        rs.next();
+        int highscore = rs.getInt(1);
+        return highscore;  
+    }
+    
+    
 }
