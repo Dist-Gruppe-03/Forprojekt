@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.Array;
+import java.sql.Statement;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -199,6 +201,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
                     st.setString(2, b.fornavn);
                     st.setInt(3, 10);
                     st.executeUpdate();
+                    conn.close();
                 }
             } else {
                 brugere.get(brugernavn);
@@ -308,8 +311,6 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         int oldHighscore;
         //db connection
         conn = connector.getConnection();
-        
-        
         PreparedStatement st = conn.prepareStatement("select highscore from USERS where username = ?");
         st.setString(1, bruger);
         ResultSet rs = st.executeQuery();
@@ -322,6 +323,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
                 st.setInt(1, score);
                 st.setString(2, bruger);
                 st.executeUpdate();
+                conn.close();
             }
         }
     }
@@ -335,6 +337,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         ResultSet rs = st.executeQuery();
         rs.next();
         String name = rs.getString(1);
+        conn.close();
         return name;
     }
     
@@ -345,8 +348,27 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         ResultSet rs = st.executeQuery();
         rs.next();
         int highscore = rs.getInt(1);
+        conn.close();
         return highscore;  
     }
     
+  public String[] getHighscores() throws java.rmi.RemoteException, ClassNotFoundException, SQLException{
+        String[] highscores = new String[10];
+        conn = connector.getConnection();
+        Statement st = null;
+        st = conn.createStatement();
+        ResultSet rs = st.executeQuery("select name, highscore from USERS order by highscore;");
+        rs.beforeFirst();
+        for (int i = 0; i < 10; i=i+2){
+            if (rs.next()){
+            highscores[i] = rs.getString("name");
+            highscores[i+1] = rs.getString("highscore");
+            }
+
+        }
+        return highscores;
+        }
+     
+
     
 }
