@@ -5,10 +5,8 @@ import javax.jws.WebService;
 import brugerautorisation.data.Bruger;
 import brugerautorisation.transport.rmi.Brugeradmin;
 import db.Connector;
-import db.User;
 import java.rmi.Naming;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,9 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.Array;
 import java.sql.Statement;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -215,50 +211,7 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         
         return false;
     }
-    
-//  public void skrivHighScore(){
-//
-//      laesHighScore();
-//      List<String> lines = Arrays.asList(Integer.toString(Highscore[0]),Integer.toString(Highscore[1]),Integer.toString(Highscore[2]),Integer.toString(Highscore[3]),Integer.toString(Highscore[4]),Integer.toString(Highscore[5]),Integer.toString(Highscore[6]),Integer.toString(Highscore[7]),Integer.toString(Highscore[8]),Integer.toString(Highscore[9]));
-//        Path file = Paths.get("highscore.txt");
-//
-//          try {
-//              Files.write(file, lines, Charset.forName("UTF-8"));
-//          } catch (IOException ex) {
-//              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex);
-//          }
-//  }
-//
-//   public int[] laesHighScore() {
-//
-//      try {
-//
-//          int counter = 0;
-//          BufferedReader in = new BufferedReader(new FileReader("highscore.txt"));
-//          String line;
-//          while((line = in.readLine()) != null){
-//              Highscore[counter] = Integer.parseInt(line);
-//              counter++;
-//          }
-//
-//          in.close();
-//
-//          Arrays.sort(Highscore);
-//          Highscore[0] = scoren;
-//          Arrays.sort(Highscore);
-//
-//          return Highscore;
-//      } catch (IOException ex) {
-//          List<String> lines = Arrays.asList("0");
-//          Path file = Paths.get("highscore.txt");
-//          try {
-//              Files.write(file, lines, Charset.forName("UTF-8"));
-//          } catch (IOException ex1) {
-//              Logger.getLogger(Galgelogik.class.getName()).log(Level.SEVERE, null, ex1);
-//          }
-//      }
-//  return Highscore;
-//   }
+ 
     public static String hentUrl(String url) throws IOException {
         System.out.println("Henter data fra " + url);
         BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
@@ -352,23 +305,19 @@ public class Galgelogik extends UnicastRemoteObject implements GalgeI {
         return highscore;  
     }
     
-  public String[] getHighscores() throws java.rmi.RemoteException, ClassNotFoundException, SQLException{
-        String[] highscores = new String[10];
+    public String[][] getHighscores() throws java.rmi.RemoteException, ClassNotFoundException, SQLException {
+        String[][] highscores = new String[2][10];
         conn = connector.getConnection();
         Statement st = null;
         st = conn.createStatement();
         ResultSet rs = st.executeQuery("select name, highscore from USERS order by highscore;");
         rs.beforeFirst();
-        for (int i = 0; i < 10; i=i+2){
-            if (rs.next()){
-            highscores[i] = rs.getString("name");
-            highscores[i+1] = rs.getString("highscore");
+        for (int i = 0; i < 10; i++) {
+            if (rs.next()) {
+                highscores[0][i] = rs.getString("name");
+                highscores[1][i] = rs.getString("highscore");
             }
-
         }
         return highscores;
-        }
-     
-
-    
+    }
 }
